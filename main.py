@@ -1,6 +1,10 @@
 # import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import List
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -32,6 +36,63 @@ def geo_center(table: pd.DataFrame) -> pd.DataFrame:
     df = df.drop(['Longitude', 'Latitude'], axis=1, level=0)
     df.columns = ['Country', 'City', 'Lon', 'Lat']
     return df
+
+
+def get_date_labels(days: int) -> List:
+    """
+    returns date labels for current day,
+    for next arg days, for previous arg days
+    """
+    orig = datetime.now()
+    labels = []
+    for day in range(days, 0, -1):
+        labels.append((orig - timedelta(days=day)).strftime('%d.%m'))
+    labels.append(orig.strftime('%d.%m'))
+    for day in range(1, days + 1):
+        labels.append((orig + timedelta(days=day)).strftime('%d.%m'))
+    return labels
+
+
+def plot_temperature(labels: List, data: List, name: str,
+                     destination: str, country: str, city: str) -> None:
+    """
+    plot data with labels titled using name, country and city
+    saves plot to given destination+country+city
+    """
+    title = name + ' ' + country + ' ' + city
+    plt.plot(labels, data)
+    plt.title(title)
+    plt.xlabel('Days')
+    plt.ylabel('Temperature in Celcius')
+    plt.savefig('data/' + country + '/' + city + '/' + title.replace(' ', '_'))
+    plt.clf()
+
+
+def temp_plots(destination: str, table: pd.DataFrame) -> None:
+    """
+    plot temperatures for countries and cities
+     and save them to destination
+    """
+    labels = get_date_labels(5)
+    for row in table.itertuples(index=False):
+        mins = [el[0] for el in row.Historical]
+        mins += [el[0] for el in row.Forecast]
+        maxs = [el[1] for el in row.Historical]
+        maxs += [el[0] for el in row.Forecast]
+        plot_temperature(labels, mins, 'Minimum temperature for',
+                         destination, row.Country, row.City)
+        plot_temperature(labels, mins, 'Maximum temperature for',
+                         destination, row.Country, row.City)
+
+
+def create_output_folders(destination, table: pd.DataFrame) -> None:
+    """
+    Create folders in given destination: {output_folder}/{country}/{city}
+    """
+    df = table[['Country', 'City']]
+    for row in df.itertuples(index=False):
+        path = destination + '/' + row.Country + '/' + row.City
+        Path(path).mkdir(parents=True, exist_ok=True)
 
 
 def main(source: str = 'data/hotels.zip', destination: str = 'data',
@@ -72,6 +133,8 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
             'Current', 'Forecast', 'Historical']
     weather_report.columns = cols
     print(weather_report)
-
+    create_output_folders(destination, weather_report)
+    temp_plots(destination, weather_report)
+    
 
 main()
