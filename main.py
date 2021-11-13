@@ -1,13 +1,13 @@
 # import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from operator import sub
 from pathlib import Path
 from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from operator import sub
 
 from data.temps import TEMPS
 # from api_request.weather import get_weather_data
