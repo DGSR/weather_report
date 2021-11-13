@@ -42,12 +42,10 @@ def filter_data(table: pd.DataFrame, max_workers) -> pd.DataFrame:
 
 def top_cities(table: pd.DataFrame) -> pd.DataFrame:
     """
-    return countries with a city that have largest number of hotels
+    return dataframe where cities have the largest number of hotels in country
     """
     df = table.groupby(['Country', 'City'], as_index=False).size()
-    # print(df)
     idx = df.groupby('Country',
                      sort=False)['size'].transform(max) == df['size']
-    # print(df[idx])
-    # print(df[idx].drop_duplicates('Country'))
-    return df[idx].drop_duplicates('Country')
+    df = df[idx].drop_duplicates('Country')
+    return table.loc[table['City'].isin(df['City'])]

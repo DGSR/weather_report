@@ -7,11 +7,12 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from operator import sub
 
 from data.temps import TEMPS
 # from api_request.weather import get_weather_data
 # from preprocess.preprocess import (zip_extract_files, read_csv_files,
-#                                    filter_data, top_cities)
+#                                   filter_data, top_cities)
 from preprocess.preprocess import filter_data, read_csv_files
 
 
@@ -85,12 +86,52 @@ def temp_plots(destination: str, table: pd.DataFrame) -> None:
                          destination, row.Country, row.City)
 
 
+def date_format(day: int) -> str:
+    """
+    return formatted date days away from now
+    """
+    orig = datetime.now()
+    return (orig + timedelta(days=day)).strftime('%d.%m')
+
+
 def post_process(table: pd.DataFrame) -> List:
     """
     find max max temperature, max max deviation
     find min min temperature, max deviation max min
     """
-    return []
+    res_value = [0, 0, 100, 0]
+    res_index = [[0, 0], 0, [0, 0], [0, 0]]
+    for index in table.index:
+        mins = [el[0] for el in table['Historical'][index]]
+        mins += [el[0] for el in table['Forecast'][index]]
+        maxs = [el[1] for el in table['Historical'][index]]
+        maxs += [el[1] for el in table['Forecast'][index]]
+
+        if res_value[0] < max(maxs):
+            res_value[0] = max(maxs)
+            res_index[0][0] = index
+            res_index[0][1] = maxs.index(max(maxs))
+        if res_value[1] < max(maxs)-min(maxs):
+            res_value[1] = max(maxs)-min(maxs)
+            res_index[1] = index
+        if res_value[2] > min(mins):
+            res_value[2] = min(mins)
+            res_index[2][0] = index
+            res_index[2][1] = mins.index(min(mins))
+        if res_value[3] < max(map(sub, maxs, mins)):
+            max_min = list(map(sub, maxs, mins))
+            res_value[3] = max(max_min)
+            res_index[3][0] = index
+            res_index[3][1] = max_min.index(max(max_min))
+    return(
+            (table.loc[[res_index[0][0]]]['City'].iat[0],
+             date_format(res_index[0][1]-5)),
+            table.loc[[res_index[1]]]['City'].iat[0],
+            (table.loc[[res_index[2][0]]]['City'].iat[0],
+             date_format(res_index[2][1]-5)),
+            (table.loc[[res_index[3][0]]]['City'].iat[0],
+             date_format(res_index[3][1]-5))
+          )
 
 
 def create_output_folders(destination, table: pd.DataFrame) -> None:
@@ -109,7 +150,7 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     # files = zip_extract_files(source, destination)
     # # add path to files
     # files = [destination+'/'+file for file in files]
-    # # read all csv files
+    # read all csv files
     c = 'part-00000-7b2b2c30-eb5e-4ab6-af89-28fae7bdb9e4-c000.csv'
     files = [destination+'/'+c]
     res = read_csv_files(files, max_workers)
@@ -125,7 +166,8 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     #
     # API code
     #
-    # top_cities(res)
+    # filtered_data = top_cities(res)
+    # print(filtered_data)
 
     # t1 = time.time()
     # res = parallelize_dataframe(res, geopy_supply, max_workers)
@@ -143,6 +185,9 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     print(weather_report)
     # create_output_folders(destination, weather_report)
     # temp_plots(destination, weather_report)
+    res0 = post_process(weather_report)
+    for i in res0:
+        print(i)
 
 
 main()
