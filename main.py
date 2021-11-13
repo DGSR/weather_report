@@ -85,6 +85,14 @@ def temp_plots(destination: str, table: pd.DataFrame) -> None:
                          destination, row.Country, row.City)
 
 
+def post_process(table: pd.DataFrame) -> List:
+    """
+    find max max temperature, max max deviation
+    find min min temperature, max deviation max min
+    """
+    return []
+
+
 def create_output_folders(destination, table: pd.DataFrame) -> None:
     """
     Create folders in given destination: {output_folder}/{country}/{city}
@@ -133,8 +141,8 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
             'Current', 'Forecast', 'Historical']
     weather_report.columns = cols
     print(weather_report)
-    create_output_folders(destination, weather_report)
-    temp_plots(destination, weather_report)
-    
+    # create_output_folders(destination, weather_report)
+    # temp_plots(destination, weather_report)
+
 
 main()
