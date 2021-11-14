@@ -21,7 +21,7 @@ def parallelize_dataframe(df, func, max_workers) -> pd.DataFrame:
     """
     df_split = np.array_split(df, max_workers)
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        df = pd.concat(pool.map(func, df_split))
+        df = pd.concat(pool.map(func, df_split), ignore_index=True)
     return df
 
 
@@ -34,7 +34,7 @@ def setup_cache() -> None:
     for file in CACHE_FILES:
         if not os.path.exists(file):
             with open(file, 'w+') as file:
-                file.write('{}')
+                file.write(' ')
 
 
 def main():
@@ -68,13 +68,11 @@ def main():
     print("Shape after filter", res.shape)
     # find top cities
     top_cities = get_top_cities(res)
-    print(top_cities)
     del res
     print("Shape after top cities", top_cities.shape)
     # find geo centers
     city_centers = geo_center(top_cities)
     print("Shape after geo_center", city_centers.shape)
-    print(city_centers)
     #
     # API code
     #
@@ -94,7 +92,6 @@ def main():
     create_output_folders(destination, weather_report)
     temp_plots(destination, weather_report)
     stats = post_process(weather_report)
-    print(stats)
     top_cities['Id'] = top_cities['Id'].astype('int64')
     save_results(destination, top_cities, weather_report)
     save_stats(destination, stats)

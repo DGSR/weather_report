@@ -26,5 +26,6 @@ def get_weather_data(table: pd.DataFrame) -> pd.DataFrame:
 
         new_row = row + (current, forecast, historical_temps)
         df = df.append(pd.Series(new_row), ignore_index=True)
-    df.columns = cols
+    if not df.empty:
+        df.columns = cols
     return df

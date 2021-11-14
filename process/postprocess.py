@@ -81,7 +81,6 @@ def post_process(table: pd.DataFrame) -> List:
         mins += [el[0] for el in table['Forecast'][index]]
         maxs = [el[1] for el in table['Historical'][index]]
         maxs += [el[1] for el in table['Forecast'][index]]
-
         if res_value[0] < max(maxs):
             res_value[0] = max(maxs)
             res_index[0][0] = index
@@ -147,8 +146,8 @@ def save_stats(destination: str, stats: Tuple) -> None:
         file.write(stats[1]+'\n')
         file.write('Day and city with min temperature\n')
         file.write(stats[2][0]+' '+stats[2][1]+'\n')
-        file.write('Day and city with maximum deviation of \
-                     max min temperatures\n')
+        file.write('Day and city with maximum deviation of'
+                   'max min temperatures\n')
         file.write(stats[3][0]+' '+stats[3][1]+'\n')
 
 
