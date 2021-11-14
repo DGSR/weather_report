@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
-from api_request.api import get_request
 from typing import List, Tuple
+
+from api_request.api import get_request
 
 
 def get_forecast_results(url: str, **params) -> Tuple:

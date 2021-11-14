@@ -1,8 +1,8 @@
 import pandas as pd
 
-from constant.api import WEATHER_API_KEY
 from api_request.weather_results import (get_forecast_results,
                                          get_historical_results)
+from constant.api import WEATHER_API_KEY
 
 
 def get_weather_data(table: pd.DataFrame) -> pd.DataFrame:
