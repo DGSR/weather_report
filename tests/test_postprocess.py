@@ -35,7 +35,8 @@ def test_save_results(tmpdir):
     cols = ['Country', 'City']
     df = pd.DataFrame(TEMPS, columns=cols)
     save_results(temp_dir, df, df)
+    new_list = [os.path.basename(file) for file in temp_dir.listdir()]
     assert len(temp_dir.listdir()) == 3
-    assert os.path.basename(temp_dir.listdir()[0]) == 'center.csv'
+    assert ('center.csv' in new_list) is True
     assert os.path.basename(dir_0.listdir()[0]) == 'hotels_0.csv'
     assert os.path.basename(dir_1.listdir()[0]) == 'hotels_0.csv'
