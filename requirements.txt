@@ -4,4 +4,3 @@ pathlib
 pytest
 pytest-sugar
 typing
-zipfile
