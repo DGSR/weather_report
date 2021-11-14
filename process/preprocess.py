@@ -38,8 +38,6 @@ def filter_data(table: pd.DataFrame) -> pd.DataFrame:
         if -180 < line.Longitude < 180 and -90 < line.Latitude < 90:
             df = df.append(pd.Series(line), ignore_index=True)
     df.columns = table.columns
-    # df['Longitude'] = df['Longitude'].astype('float64')
-    # df['Latitude'] = df['Latitude'].astype('float64')
     return df
 
 
@@ -51,7 +49,7 @@ def get_top_cities(table: pd.DataFrame) -> pd.DataFrame:
     idx = df.groupby('Country',
                      sort=False)['size'].transform(max) == df['size']
     df = df[idx].drop_duplicates('Country')
-    return table.loc[table['City'].isin(df['City'])]
+    return table.loc[table['City'].isin(df['City'])].drop_duplicates('City')
 
 
 def geo_center(table: pd.DataFrame) -> pd.DataFrame:

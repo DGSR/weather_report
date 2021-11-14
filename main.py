@@ -57,6 +57,7 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     res = parallelize_dataframe(res, filter_data, max_workers)
     print("Shape after filter", res.shape)
     # find top cities
+    print(res)
     top_cities = get_top_cities(res)
     del res
     print("Shape after top cities", top_cities.shape)

@@ -1,23 +1,43 @@
-# from unittest.mock import patch
+import pandas  # noqa: F401
+from numpy import array_equal
 
-# from process.preprocess import filter_data
-# import pandas  # noqa: F401
-# from pandas._testing import assert_frame_equal
+from process.preprocess import filter_data, geo_center, get_top_cities
 
 
-# def test_filter_data():
-#     cols = ['Longitude', 'Latitude']
-#     df = pandas.DataFrame([[1.0, 2.0], [3.0, 4.0]], columns=cols)
-#     df_res = filter_data(df)
-#     df1 = pandas.DataFrame([[-182.0, 3.0], [5.0, 6.0]],
-#                            columns=cols)
-#     df1_0 = pandas.DataFrame([[5.0, 6.0]], columns=cols)
-#     df2 = pandas.DataFrame([[-112.0, 3.0], [5.0, 91.0]],
-#                            columns=cols)
-#     df2_0 = pandas.DataFrame([[-112.0, 3.0]], columns=cols)
-#     df3 = pandas.DataFrame([[181.0, 2.0], [9.0, -90.0]], columns=cols)
-#     df3_0 = pandas.DataFrame(columns=['A', 'B'])
-#     assert assert_frame_equal(df_res, df, check_dtype=False,)
-#     assert assert_frame_equal(filter_data(df1), df1_0, check_dtype=False)
-#     assert assert_frame_equal(filter_data(df2), df2_0, check_dtype=False)
-#     assert assert_frame_equal(filter_data(df3), df3_0, check_dtype=False)
+def test_filter_data():
+    cols = ['Longitude', 'Latitude']
+    df = pandas.DataFrame([[1.0, 2.0], [3.0, 4.0]], columns=cols)
+    df1 = pandas.DataFrame([[-182.0, 3.0], [5.0, 6.0]],
+                           columns=cols)
+    df1_0 = pandas.DataFrame([[5.0, 6.0]], columns=cols)
+    df2 = pandas.DataFrame([[-112.0, 3.0], [5.0, 91.0]],
+                           columns=cols)
+    df2_0 = pandas.DataFrame([[-112.0, 3.0]], columns=cols)
+    assert filter_data(df).equals(df) is True
+    assert filter_data(df1).equals(df1_0) is True
+    assert filter_data(df2).equals(df2_0) is True
+
+
+def test_get_top_cities():
+    cols = ['Country', 'City']
+    TEMPS = [('US', 'Arvada'),
+             ('GB', 'London'),
+             ('GB', 'Paddington'),
+             ('GB', 'Paddington')]
+    res = [('US', 'Arvada'),
+           ('GB', 'Paddington')]
+    df = pandas.DataFrame(TEMPS, columns=cols)
+    df_res = pandas.DataFrame(res, columns=cols)
+    df_func = get_top_cities(df)
+    assert array_equal(df_func, df_res) is True
+
+
+def test_geo_center():
+    cols = ['Country', 'City', 'Longitude', 'Latitude']
+    TEMPS = [('US', 'Arvada', 1.0, 4.0),
+             ('US', 'Arvada', 2.0, 7.0),
+             ('US', 'Arvada', 3.0, 8.0)]
+    TEMPS1 = [('US', 'Arvada', 2.0, 6.0)]
+    df = pandas.DataFrame(TEMPS, columns=cols)
+    df_res = pandas.DataFrame(TEMPS1, columns=cols)
+    assert array_equal(geo_center(df), df_res) is True
