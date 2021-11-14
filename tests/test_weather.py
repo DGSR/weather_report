@@ -1,6 +1,8 @@
-from api_request.weather import get_forecast_results, get_historical_results
 from unittest.mock import patch
+
 from freezegun import freeze_time
+
+from api_request.weather import get_forecast_results, get_historical_results
 
 
 def test_get_forecast_results():
