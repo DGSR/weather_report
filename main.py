@@ -8,8 +8,6 @@ import pandas as pd
 
 from constants.constants import CACHE_FILE, CACHE_FOLDER
 from data.temps import TEMPS
-# from process.preprocess import (filter_data, geo_center, read_csv_files,
-#                                 get_top_cities)
 from process.postprocess import (create_output_folders, post_process,
                                  save_results, save_stats, temp_plots)
 # from api_request.weather import get_weather_data
@@ -28,6 +26,9 @@ def parallelize_dataframe(df, func, max_workers) -> pd.DataFrame:
 
 
 def setup_cache() -> None:
+    """
+    Create CACHE_FOLDER folder and CACHE_FILE file for caching
+    """
     if not os.path.exists(CACHE_FOLDER):
         os.mkdir(CACHE_FOLDER)
     if not os.path.exists(CACHE_FILE):
@@ -35,8 +36,7 @@ def setup_cache() -> None:
             file.write('{}')
 
 
-def main(source: str = 'data/hotels.zip', destination: str = 'data',
-         max_workers: int = 32):
+def main():
     t1 = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument("source", help="relative path to zip archive\
@@ -45,9 +45,9 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     parser.add_argument("--max_workers", help="amount of threads to\
                                              process data")
     args = parser.parse_args()
-    # source = args.source
+    source = args.source
     destination = args.destination
-    max_workers = max_workers if args.max_workers else 16
+    max_workers = args.max_workers if args.max_workers else 16
     setup_cache()
     print("Extracting csv from archive")
     files = zip_extract_files(source, destination)
@@ -69,7 +69,6 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     top_cities = get_top_cities(res)
     print(top_cities)
     del res
-    return 0
     print("Shape after top cities", top_cities.shape)
     # find geo centers
     city_centers = geo_center(top_cities)

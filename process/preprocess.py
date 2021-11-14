@@ -47,7 +47,6 @@ def get_top_cities(table: pd.DataFrame) -> pd.DataFrame:
     filter dataframe where cities have the largest number of hotels in country
     """
     df = table.groupby(['Country', 'City'], as_index=False).size()
-    print(df)
     idx = df.groupby('Country',
                      sort=False)['size'].transform(max) == df['size']
     df = df[idx].drop_duplicates('Country')
