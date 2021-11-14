@@ -17,7 +17,7 @@ def get_request(url: str, type_request: int, **params) -> dict:
         return cached_data
     r = requests.get(url_api)
     res = cleanse_json(r.json(), type_request)
-    set_request_cache({url_api: res})
+    set_request_cache({url_api: res}, type_request)
     return res
 
 
