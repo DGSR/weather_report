@@ -109,15 +109,13 @@ def post_process(table: pd.DataFrame) -> List:
           )
 
 
-def save_results(destination: str, hotels: pd.DataFrame, weather: pd.DataFrame,
-                 stats: Tuple, chunk_size: int = 100) -> None:
+def save_results(destination: str, hotels: pd.DataFrame,
+                 weather: pd.DataFrame, chunk_size: int = 100) -> None:
     """
     save data about hotels in cities and countries in given destination:
     {destination}/{country}/{city}/{hotel_chunk_id.csv}
     save data about center in destination/center.csv
-    save stats to stats.txt
     """
-    save_stats(destination, stats)
     path = Path(destination)
     countries = [x for x in path.iterdir() if x.is_dir()]
     for country in countries:

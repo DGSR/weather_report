@@ -11,7 +11,7 @@ from data.temps import TEMPS
 # from process.preprocess import (filter_data, geo_center, read_csv_files,
 #                                 get_top_cities)
 from process.postprocess import (create_output_folders, post_process,
-                                 save_results, temp_plots)
+                                 save_results, save_stats, temp_plots)
 # from api_request.weather import get_weather_data
 from process.preprocess import (filter_data, geo_center, get_top_cities,
                                 read_csv_files, zip_extract_files)
@@ -93,10 +93,11 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     weather_report.columns = cols
     create_output_folders(destination, weather_report)
     temp_plots(destination, weather_report)
-    res0 = post_process(weather_report)
-    print(res0)
+    stats = post_process(weather_report)
+    print(stats)
     top_cities['Id'] = top_cities['Id'].astype('int64')
     save_results(destination, top_cities, weather_report)
+    save_stats(destination, stats)
     t2 = time.time()
     print(f"It took {t2 - t1} seconds")
 
