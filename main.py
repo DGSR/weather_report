@@ -6,11 +6,11 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
 
-from constants.constants import CACHE_FILE, CACHE_FOLDER
-from data.temps import TEMPS
+from api_request.weather import get_weather_data
+from constant.constants import CACHE_FILE, CACHE_FOLDER
+# from data.temps import TEMPS
 from process.postprocess import (create_output_folders, post_process,
                                  save_results, save_stats, temp_plots)
-# from api_request.weather import get_weather_data
 from process.preprocess import (filter_data, geo_center, get_top_cities,
                                 read_csv_files, zip_extract_files)
 
@@ -82,14 +82,14 @@ def main():
     # res = parallelize_dataframe(res, geopy_supply, max_workers)
     # t2 = time.time()
     # print(f"It took {t2 - t1} seconds")
-    # weather_report = parallelize_dataframe(city_centers[0:100],
-    #                                        get_weather_data, max_workers)
+    weather_report = parallelize_dataframe(city_centers,
+                                           get_weather_data, max_workers)
 
     # Reading API results from file
-    weather_report = pd.DataFrame(TEMPS)
-    cols = ['Country', 'City', 'Longitude', 'Latitude',
-            'Current', 'Forecast', 'Historical']
-    weather_report.columns = cols
+    # weather_report = pd.DataFrame(TEMPS)
+    # cols = ['Country', 'City', 'Longitude', 'Latitude',
+    #         'Current', 'Forecast', 'Historical']
+    # weather_report.columns = cols
     create_output_folders(destination, weather_report)
     temp_plots(destination, weather_report)
     stats = post_process(weather_report)

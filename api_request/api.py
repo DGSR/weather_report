@@ -2,8 +2,7 @@ import json
 import urllib.parse
 
 import requests
-
-from constants.constants import CACHE_FILE
+from constant.constants import CACHE_FILE
 
 
 def get_request(url: str, **params) -> dict:

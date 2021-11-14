@@ -6,7 +6,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from constants.constants import STATS_FILE
+from constant.constants import STATS_FILE
 
 
 def date_format(day: int) -> str:
@@ -141,15 +141,15 @@ def save_stats(destination: str, stats: Tuple) -> None:
     write stats to destination + STATS_FILE
     """
     with open(destination + STATS_FILE, 'w+') as file:
-        file.writelines('Day and city with max temperature \n')
-        file.writelines(stats[0][0]+' '+stats[0][1]+'\n')
-        file.writelines('City with maximum deviation of max temperature\n')
-        file.writelines(stats[1]+'\n')
-        file.writelines('Day and city with min temperature\n')
-        file.writelines(stats[2][0]+' '+stats[2][1]+'\n')
-        file.writelines('Day and city with maximum deviation of \
+        file.write('Day and city with max temperature \n')
+        file.write(stats[0][0]+' '+stats[0][1]+'\n')
+        file.write('City with maximum deviation of max temperature\n')
+        file.write(stats[1]+'\n')
+        file.write('Day and city with min temperature\n')
+        file.write(stats[2][0]+' '+stats[2][1]+'\n')
+        file.write('Day and city with maximum deviation of \
                      max min temperatures\n')
-        file.writelines(stats[3][0]+' '+stats[3][1]+'\n')
+        file.write(stats[3][0]+' '+stats[3][1]+'\n')
 
 
 def create_output_folders(destination: str, table: pd.DataFrame) -> None:
