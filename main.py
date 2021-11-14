@@ -12,8 +12,8 @@ import pandas as pd
 from data.temps import TEMPS
 # from api_request.weather import get_weather_data
 # from preprocess.preprocess import (zip_extract_files, read_csv_files,
-#                                   filter_data, top_cities)
-from preprocess.preprocess import filter_data, read_csv_files
+#                                    filter_data, top_cities)
+from preprocess.preprocess import filter_data, read_csv_files, top_cities
 
 
 def parallelize_dataframe(df, func, max_workers) -> pd.DataFrame:
@@ -39,6 +39,14 @@ def geo_center(table: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def date_format(day: int) -> str:
+    """
+    return formatted date days away from now
+    """
+    orig = datetime.now()
+    return (orig + timedelta(days=day)).strftime('%d.%m')
+
+
 def get_date_labels(days: int) -> List:
     """
     returns date labels for current day,
@@ -47,10 +55,10 @@ def get_date_labels(days: int) -> List:
     orig = datetime.now()
     labels = []
     for day in range(days, 0, -1):
-        labels.append((orig - timedelta(days=day)).strftime('%d.%m'))
+        labels.append(date_format(-day))
     labels.append(orig.strftime('%d.%m'))
     for day in range(1, days + 1):
-        labels.append((orig + timedelta(days=day)).strftime('%d.%m'))
+        labels.append(date_format(day))
     return labels
 
 
@@ -66,6 +74,7 @@ def plot_temperature(labels: List, data: List, name: str,
     plt.xlabel('Days')
     plt.ylabel('Temperature in Celcius')
     plt.savefig('data/' + country + '/' + city + '/' + title.replace(' ', '_'))
+    plt.close()
     plt.clf()
 
 
@@ -82,16 +91,8 @@ def temp_plots(destination: str, table: pd.DataFrame) -> None:
         maxs += [el[0] for el in row.Forecast]
         plot_temperature(labels, mins, 'Minimum temperature for',
                          destination, row.Country, row.City)
-        plot_temperature(labels, mins, 'Maximum temperature for',
+        plot_temperature(labels, maxs, 'Maximum temperature for',
                          destination, row.Country, row.City)
-
-
-def date_format(day: int) -> str:
-    """
-    return formatted date days away from now
-    """
-    orig = datetime.now()
-    return (orig + timedelta(days=day)).strftime('%d.%m')
 
 
 def post_process(table: pd.DataFrame) -> List:
@@ -134,7 +135,34 @@ def post_process(table: pd.DataFrame) -> List:
           )
 
 
-def create_output_folders(destination, table: pd.DataFrame) -> None:
+def save_results(destination: str, hotels: pd.DataFrame,
+                 weather: pd.DataFrame, chunk_size: int = 100) -> None:
+    """
+    save data about hotels in cities and countries in given destination:
+    {destination}/{country}/{city}/{hotel_chunk_id.csv}
+    save data about center in destination/center.csv
+    """
+    path = Path(destination)
+    countries = [x for x in path.iterdir() if x.is_dir()]
+    for country in countries:
+        if not hotels['Country'].str.contains(country.name, regex=False).any():
+            continue
+        cities = [x for x in country.iterdir() if x.is_dir()]
+        for city in cities:
+            if not hotels['City'].str.contains(city.name, regex=False).any():
+                continue
+            selected = hotels[(hotels['Country'] == country.name) &
+                              (hotels['City'] == city.name)]
+            chunks = [selected[i:i+chunk_size] for i in
+                      range(0, selected.shape[0], chunk_size)]
+            for id, chunk in enumerate(chunks):
+                chunk.to_csv(str(city) + '/hotels_{id}.csv'.format(id=id),
+                             index=False)
+
+    weather.to_csv(destination+'/center.csv', index=False)
+
+
+def create_output_folders(destination: str, table: pd.DataFrame) -> None:
     """
     Create folders in given destination: {output_folder}/{country}/{city}
     """
@@ -162,12 +190,15 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     # filter DataFrame
     res = filter_data(res, max_workers)
     print("Shape after filter", res.shape)
-
+    # find top cities
+    filtered_data = top_cities(res)
+    print("Shape after top cities", filtered_data.shape)
+    # find geo centers
+    geo_centered = geo_center(filtered_data)
+    print("Shape after geo_center", geo_centered.shape)
     #
     # API code
     #
-    # filtered_data = top_cities(res)
-    # print(filtered_data)
 
     # t1 = time.time()
     # res = parallelize_dataframe(res, geopy_supply, max_workers)
@@ -179,15 +210,15 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
 
     # Reading API results from file
     weather_report = pd.DataFrame(TEMPS)
-    cols = ['Country', 'City', 'Latitude', 'Longitude',
+    cols = ['Country', 'City', 'Longitude', 'Latitude',
             'Current', 'Forecast', 'Historical']
     weather_report.columns = cols
-    print(weather_report)
-    # create_output_folders(destination, weather_report)
-    # temp_plots(destination, weather_report)
+    create_output_folders(destination, weather_report)
+    temp_plots(destination, weather_report)
     res0 = post_process(weather_report)
-    for i in res0:
-        print(i)
+    print(res0)
+    res['Id'] = res['Id'].astype('int64')
+    save_results(destination, res, weather_report)
 
 
 main()
