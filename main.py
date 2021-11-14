@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from api_request.weather import get_weather_data
-from constant.constants import CACHE_FILE, CACHE_FOLDER
+from constant.constants import CACHE_FILES, CACHE_FOLDER
 # from data.temps import TEMPS
 from process.postprocess import (create_output_folders, post_process,
                                  save_results, save_stats, temp_plots)
@@ -31,9 +31,10 @@ def setup_cache() -> None:
     """
     if not os.path.exists(CACHE_FOLDER):
         os.mkdir(CACHE_FOLDER)
-    if not os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, 'w+') as file:
-            file.write('{}')
+    for file in CACHE_FILES:
+        if not os.path.exists(file):
+            with open(file, 'w+') as file:
+                file.write('{}')
 
 
 def main():

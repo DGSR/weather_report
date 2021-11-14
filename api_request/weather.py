@@ -12,12 +12,9 @@ def get_forecast_results(url: str, **params) -> Tuple:
     get weather forecast for current and 5 days forward
     return tuple of current temp and max min temps for days
     """
-    js = get_request(url, **params)
-    current = js['current']['temp']
-    forecast_temp = []
-    for index in range(0, 6):
-        forecast_temp.append((js['daily'][index]['temp']['min'],
-                              js['daily'][index]['temp']['max']))
+    js = get_request(url, 0, **params)
+    current = js['current']
+    forecast_temp = js['daily']
     return (current, forecast_temp)
 
 
@@ -30,9 +27,8 @@ def get_historical_results(url: str, **params) -> List:
     historical_temp = []
     for day in range(1, 6):
         dt = round((orig - timedelta(days=day)).timestamp())
-        js_historical = get_request(url, **params, **{'dt': dt})
-        day_temps = [hourly['temp'] for hourly in js_historical['hourly']]
-        historical_temp.append((min(day_temps), max(day_temps)))
+        js_historical = get_request(url, 1, **params, **{'dt': dt})
+        historical_temp.append(js_historical['history'])
     return historical_temp
 
 
