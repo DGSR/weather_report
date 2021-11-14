@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from operator import sub
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import pandas as pd
+
+from constants.constants import STATS_FILE
 
 
 def date_format(day: int) -> str:
@@ -65,8 +67,12 @@ def temp_plots(destination: str, table: pd.DataFrame) -> None:
 
 def post_process(table: pd.DataFrame) -> List:
     """
-    find max max temperature, max max deviation
-    find min min temperature, max deviation max min
+    return Tuple of following stats:
+        Day and city with max temperature
+        City with maximum deviation of max temperature
+        Day and city with min temperature
+        Day and city with maximum deviation of
+            max min temperatures
     """
     res_value = [0, 0, 100, 0]
     res_index = [[0, 0], 0, [0, 0], [0, 0]]
@@ -103,13 +109,15 @@ def post_process(table: pd.DataFrame) -> List:
           )
 
 
-def save_results(destination: str, hotels: pd.DataFrame,
-                 weather: pd.DataFrame, chunk_size: int = 100) -> None:
+def save_results(destination: str, hotels: pd.DataFrame, weather: pd.DataFrame,
+                 stats: Tuple, chunk_size: int = 100) -> None:
     """
     save data about hotels in cities and countries in given destination:
     {destination}/{country}/{city}/{hotel_chunk_id.csv}
     save data about center in destination/center.csv
+    save stats to stats.txt
     """
+    save_stats(destination, stats)
     path = Path(destination)
     countries = [x for x in path.iterdir() if x.is_dir()]
     for country in countries:
@@ -128,6 +136,22 @@ def save_results(destination: str, hotels: pd.DataFrame,
                              index=False)
 
     weather.to_csv(destination+'/center.csv', index=False)
+
+
+def save_stats(destination: str, stats: Tuple) -> None:
+    """
+    write stats to destination + STATS_FILE
+    """
+    with open(STATS_FILE, 'w+') as file:
+        file.write('Day and city with max temperature')
+        file.write(stats[0][0], stats[0][1])
+        file.write('City with maximum deviation of max temperature')
+        file.write(stats[1])
+        file.write('Day and city with min temperature')
+        file.write(stats[2][0], stats[2][1])
+        file.write('Day and city with maximum deviation of \
+                     max min temperatures')
+        file.write(stats[3][0], stats[3][1])
 
 
 def create_output_folders(destination: str, table: pd.DataFrame) -> None:

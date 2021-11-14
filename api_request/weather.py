@@ -1,16 +1,9 @@
-import urllib.parse
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import pandas as pd
-import requests
 
-
-def get_request(url: str, **params) -> str:
-    param_api = urllib.parse.urlencode(params)
-    url_api = url % param_api
-    r = requests.get(url_api)
-    return r.json()
+from api_request.api import get_request
 
 
 def get_forecast_results(url: str, **params) -> Tuple:

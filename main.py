@@ -1,10 +1,12 @@
 import argparse
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 import pandas as pd
 
+from constants.constants import CACHE_FILE, CACHE_FOLDER
 from data.temps import TEMPS
 # from process.preprocess import (filter_data, geo_center, read_csv_files,
 #                                 get_top_cities)
@@ -25,6 +27,14 @@ def parallelize_dataframe(df, func, max_workers) -> pd.DataFrame:
     return df
 
 
+def setup_cache() -> None:
+    if not os.path.exists(CACHE_FOLDER):
+        os.mkdir(CACHE_FOLDER)
+    if not os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, 'w+') as file:
+            file.write('{}')
+
+
 def main(source: str = 'data/hotels.zip', destination: str = 'data',
          max_workers: int = 32):
     t1 = time.time()
@@ -37,14 +47,13 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     args = parser.parse_args()
     # source = args.source
     destination = args.destination
-    max_workers = max_workers if args.max_workers else 32
+    max_workers = max_workers if args.max_workers else 16
+    setup_cache()
     print("Extracting csv from archive")
     files = zip_extract_files(source, destination)
     # add path to files
     files = [destination+'/'+file for file in files]
     # read all csv files
-    # c = 'part-00000-7b2b2c30-eb5e-4ab6-af89-28fae7bdb9e4-c000.csv'
-    # files = [destination+'/'+c]
     print("Reading all csv to DataFrame")
     res = read_csv_files(files, max_workers)
     print("Files shape", res.shape)
@@ -57,13 +66,15 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     res = parallelize_dataframe(res, filter_data, max_workers)
     print("Shape after filter", res.shape)
     # find top cities
-    print(res)
     top_cities = get_top_cities(res)
+    print(top_cities)
     del res
+    return 0
     print("Shape after top cities", top_cities.shape)
     # find geo centers
     city_centers = geo_center(top_cities)
     print("Shape after geo_center", city_centers.shape)
+    print(city_centers)
     #
     # API code
     #
@@ -72,7 +83,6 @@ def main(source: str = 'data/hotels.zip', destination: str = 'data',
     # res = parallelize_dataframe(res, geopy_supply, max_workers)
     # t2 = time.time()
     # print(f"It took {t2 - t1} seconds")
-    # city_centers = geo_center(res)
     # weather_report = parallelize_dataframe(city_centers[0:100],
     #                                        get_weather_data, max_workers)
 
