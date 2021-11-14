@@ -1,4 +1,5 @@
 # import time
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from operator import sub
@@ -174,13 +175,24 @@ def create_output_folders(destination: str, table: pd.DataFrame) -> None:
 
 def main(source: str = 'data/hotels.zip', destination: str = 'data',
          max_workers: int = 32):
-    # # extract files from archive
+    parser = argparse.ArgumentParser()
+    parser.add_argument("source", help="relative path to zip archive\
+                                       with csv files")
+    parser.add_argument("destination", help="output directory for all results")
+    parser.add_argument("--max_workers", help="amount of threads to\
+                                             process data")
+    args = parser.parse_args()
+    # source = args.source
+    destination = args.destination
+    max_workers = max_workers if args.max_workers else 32
+    print("Extracting csv from archive")
     # files = zip_extract_files(source, destination)
     # # add path to files
     # files = [destination+'/'+file for file in files]
     # read all csv files
     c = 'part-00000-7b2b2c30-eb5e-4ab6-af89-28fae7bdb9e4-c000.csv'
     files = [destination+'/'+c]
+    print("Reading all csv to DataFrame")
     res = read_csv_files(files, max_workers)
     print("Files shape", res.shape)
 
