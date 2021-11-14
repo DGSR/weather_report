@@ -17,9 +17,9 @@ def get_forecast_results(url: str, **params) -> Tuple:
     js = get_request(url, **params)
     current = js['current']['temp']
     forecast_temp = []
-    for i in range(0, 6):
-        forecast_temp.append((js['daily'][i]['temp']['min'],
-                              js['daily'][i]['temp']['max']))
+    for index in range(0, 6):
+        forecast_temp.append((js['daily'][index]['temp']['min'],
+                              js['daily'][index]['temp']['max']))
     return (current, forecast_temp)
 
 
