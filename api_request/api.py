@@ -54,9 +54,7 @@ def cleanse_json(js: dict, type_request: int) -> dict:
             list_temps.append((js['daily'][index]['temp']['min'],
                                js['daily'][index]['temp']['max']))
         new_res.append(list_temps)
-    if type_request == 1:
+    else:
         day_temps = [hourly['temp'] for hourly in js['hourly']]
         new_res.extend([min(day_temps), max(day_temps)])
-    if type_request == 2:
-        pass
     return new_res

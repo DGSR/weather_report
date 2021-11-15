@@ -14,7 +14,7 @@ def pairwise(arr: List) -> List:
 
 def clear_elements(arr: List) -> List:
     """
-    clear from signs and cast to float
+    clear elements of list from signs and cast to float
     """
     if len(arr[0]) == 1:
         return pairwise(arr)

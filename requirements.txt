@@ -1,4 +1,5 @@
 freezegun
+geopy
 matplotlib
 pandas
 pathlib
