@@ -25,6 +25,7 @@ def test_get_top_cities():
              ('GB', 'Paddington'),
              ('GB', 'Paddington')]
     res = [('US', 'Arvada'),
+           ('GB', 'Paddington'),
            ('GB', 'Paddington')]
     df = pandas.DataFrame(TEMPS, columns=cols)
     df_res = pandas.DataFrame(res, columns=cols)

@@ -16,7 +16,6 @@ def get_request(url: str, type_request: int, **params) -> dict:
     if (cached_data := get_cached_request(url_api, type_request)) is not None:
         return cached_data
     r = requests.get(url_api)
-    print("request sent", url_api)
     res = cleanse_json(r.json(), type_request)
     set_request_cache(url_api, res, type_request)
     return res
@@ -30,8 +29,6 @@ def get_cached_request(url: str, type_request: int) -> dict:
         for line in file.readlines():
             if url in line:
                 return line.split(',')[1:]
-        # data = json.load(file)
-        # return data.get(url, None)
 
 
 def set_request_cache(url: str, js: List, type_request: int) -> None:
@@ -43,9 +40,6 @@ def set_request_cache(url: str, js: List, type_request: int) -> None:
         for item in js:
             file.write('%s,' % item)
         file.write('\n')
-        # data = json.load(file)
-        # file.seek(0)
-        # file.write(json.dumps({**data, **js}))
 
 
 def cleanse_json(js: dict, type_request: int) -> dict:

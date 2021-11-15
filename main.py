@@ -6,9 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
 
+from api_request.geo import geopy_supply
 from api_request.weather import get_weather_data
 from constant.constants import CACHE_FILES, CACHE_FOLDER
-# from data.temps import TEMPS
 from process.postprocess import (create_output_folders, post_process,
                                  save_results, save_stats, temp_plots)
 from process.preprocess import (filter_data, geo_center, get_top_cities,
@@ -49,53 +49,36 @@ def main():
     source = args.source
     destination = args.destination
     max_workers = args.max_workers if args.max_workers else 16
-    setup_cache()
-    print("Extracting csv from archive")
-    files = zip_extract_files(source, destination)
-    # add path to files
-    files = [destination+'/'+file for file in files]
-    # read all csv files
-    print("Reading all csv to DataFrame")
-    res = read_csv_files(files, max_workers)
-    print("Files shape", res.shape)
 
-    # cast Longitude and Latitude columns to float
+    setup_cache()
+    print('Starting Preprocess')
+    files = zip_extract_files(source, destination)
+    files = [destination+'/'+file for file in files]
+    res = read_csv_files(files, max_workers)
+
     res['Longitude'] = pd.to_numeric(res['Longitude'], errors='coerce')
     res['Latitude'] = pd.to_numeric(res['Latitude'], errors='coerce')
-    # filter DataFrame
-    # res = filter_data(res)
-    res = parallelize_dataframe(res, filter_data, max_workers)
-    print("Shape after filter", res.shape)
-    # find top cities
-    top_cities = get_top_cities(res)
-    del res
-    print("Shape after top cities", top_cities.shape)
-    # find geo centers
-    city_centers = geo_center(top_cities)
-    print("Shape after geo_center", city_centers.shape)
-    #
-    # API code
-    #
 
-    # t1 = time.time()
-    # res = parallelize_dataframe(res, geopy_supply, max_workers)
-    # t2 = time.time()
-    # print(f"It took {t2 - t1} seconds")
+    res = parallelize_dataframe(res, filter_data, max_workers)
+    hotels_top_city = get_top_cities(res)
+    del res
+    print('Finishing Preprocess')
+    print('Getting GeoData')
+    geo_data = geopy_supply(hotels_top_city, max_workers)
+    print('GeoData Received')
+    city_centers = geo_center(geo_data)
+    print('Getting Weather Data')
     weather_report = parallelize_dataframe(city_centers,
                                            get_weather_data, max_workers)
-
-    # Reading API results from file
-    # weather_report = pd.DataFrame(TEMPS)
-    # cols = ['Country', 'City', 'Longitude', 'Latitude',
-    #         'Current', 'Forecast', 'Historical']
-    # weather_report.columns = cols
+    print('Got Weather Data, Starting Postprocess')
     create_output_folders(destination, weather_report)
     temp_plots(destination, weather_report)
     stats = post_process(weather_report)
-    top_cities['Id'] = top_cities['Id'].astype('int64')
-    save_results(destination, top_cities, weather_report)
+    geo_data['Id'] = geo_data['Id'].astype('int64')
+    save_results(destination, geo_data, weather_report)
     save_stats(destination, stats)
     t2 = time.time()
+    print('Finishing Postprocess')
     print(f"It took {t2 - t1} seconds")
 
 

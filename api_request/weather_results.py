@@ -16,6 +16,8 @@ def clear_elements(arr: List) -> List:
     """
     clear from signs and cast to float
     """
+    if len(arr[0]) == 1:
+        return pairwise(arr)
     temp_arr = [float(arr[0][2:])]
     for item in arr[1:-2]:
         temp = item.replace('(', '')

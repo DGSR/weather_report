@@ -50,7 +50,7 @@ def get_top_cities(table: pd.DataFrame) -> pd.DataFrame:
     idx = df.groupby('Country',
                      sort=False)['size'].transform(max) == df['size']
     df = df[idx].drop_duplicates('Country')
-    return table.loc[table['City'].isin(df['City'])].drop_duplicates('City')
+    return table.loc[table['City'].isin(df['City'])]
 
 
 def geo_center(table: pd.DataFrame) -> pd.DataFrame:
