@@ -16,8 +16,8 @@ def clear_elements(arr: List) -> List:
     """
     clear elements of list from signs and cast to float
     """
-    if len(arr[0]) == 1:
-        return pairwise(arr)
+    if len(arr) == 1:
+        return arr[0]
     temp_arr = [float(arr[0][2:])]
     for item in arr[1:-2]:
         temp = item.replace('(', '')
@@ -34,7 +34,9 @@ def get_forecast_results(url: str, **params) -> Tuple:
     """
     js = get_request(url, 0, **params)
     current = js[0]
+    print(js[1:])
     forecast_temp = clear_elements(js[1:])
+    print(forecast_temp)
     return (current, forecast_temp)
 
 
